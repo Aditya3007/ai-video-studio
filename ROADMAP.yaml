@@ -40,7 +40,7 @@ phases:
           - Automated tests run on PR
           - Automated linting runs on PR
           - Build verification runs on PR
-        status: READY
+        status: COMPLETED
 
       - task_id: P0-T04
         title: Set up secrets management
@@ -50,7 +50,7 @@ phases:
           - Environment variable template (.env.example)
           - Documentation for required secrets
           - Secrets validation on startup
-        status: BACKLOG
+        status: READY
 
   P1:
     name: Application foundation
