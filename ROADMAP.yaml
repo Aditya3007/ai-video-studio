@@ -29,7 +29,7 @@ phases:
           - Code formatting configured (Prettier, Black, or equivalent)
           - Pre-commit hooks configured
           - Test framework set up
-        status: READY
+        status: COMPLETED
 
       - task_id: P0-T03
         title: Configure CI/CD pipeline
@@ -40,7 +40,7 @@ phases:
           - Automated tests run on PR
           - Automated linting runs on PR
           - Build verification runs on PR
-        status: BACKLOG
+        status: READY
 
       - task_id: P0-T04
         title: Set up secrets management

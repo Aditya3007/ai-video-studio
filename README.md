@@ -42,4 +42,3 @@ For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 TBD
-

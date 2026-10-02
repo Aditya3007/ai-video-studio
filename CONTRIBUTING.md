@@ -107,8 +107,153 @@ Before making changes, AI agents should:
 
 1. Fork the repository
 2. Clone your fork
-3. Set up the development environment (see P0-T02 in ROADMAP.yaml)
+3. Set up the development environment (see below)
 4. Create a branch for your work
+
+## Local Development Setup
+
+### Prerequisites
+
+- **Python 3.11+**: Install via [pyenv](https://github.com/pyenv/pyenv) or [python.org](https://www.python.org/)
+- **Node.js 18+**: Install via [nvm](https://github.com/nvm-sh/nvm) or [nodejs.org](https://nodejs.org/)
+- **Git**: Install via [git-scm.com](https://git-scm.com/)
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+3. Run tests:
+   ```bash
+   pytest
+   ```
+
+4. Run linting:
+   ```bash
+   ruff check .
+   ```
+
+5. Run formatting check:
+   ```bash
+   black --check .
+   ```
+
+6. Format code:
+   ```bash
+   black .
+   ```
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Run linting:
+   ```bash
+   npm run lint
+   ```
+
+5. Fix linting issues:
+   ```bash
+   npm run lint:fix
+   ```
+
+6. Run formatting check:
+   ```bash
+   npm run format:check
+   ```
+
+7. Format code:
+   ```bash
+   npm run format
+   ```
+
+8. Build for production:
+   ```bash
+   npm run build
+   ```
+
+### Pre-commit Hooks
+
+Pre-commit hooks are configured to run automatically before commits. To set them up:
+
+1. Install pre-commit (if not already installed):
+   ```bash
+   pip install pre-commit
+   ```
+
+2. Install the hooks:
+   ```bash
+   pre-commit install
+   ```
+
+3. Run hooks manually on all files:
+   ```bash
+   pre-commit run --all-files
+   ```
+
+The pre-commit hooks will:
+- Run Ruff (Python linter) with auto-fix
+- Run Black (Python formatter)
+- Check for trailing whitespace
+- Fix end-of-file issues
+- Validate YAML files
+- Check for large files
+- Check for merge conflicts
+- Validate TOML files
+
+### Environment Configuration
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Fill in the required values in `.env` (most are not needed for initial development)
+
+### Verification
+
+To verify your setup is working:
+
+1. Backend:
+   ```bash
+   cd backend
+   pytest  # Should pass
+   ruff check .  # Should pass
+   black --check .  # Should pass
+   ```
+
+2. Frontend:
+   ```bash
+   cd frontend
+   npm run lint  # Should pass
+   npm run format:check  # Should pass
+   npm run build  # Should succeed
+   ```
+
+3. Pre-commit:
+   ```bash
+   pre-commit run --all-files  # Should pass
+   ```
 
 ### Making Changes
 
