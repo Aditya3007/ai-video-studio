@@ -1,0 +1,130 @@
+.story-workspace {
+  display: grid;
+  grid-template-columns: 240px 240px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.story-nav,
+.scene-nav,
+.story-detail {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 200px;
+  text-align: left;
+}
+
+.story-nav h3,
+.scene-nav h3,
+.story-detail h2 {
+  margin-top: 0;
+}
+
+.story-list,
+.episode-list,
+.scene-list,
+.shot-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.story-list li,
+.episode-list li,
+.scene-list li,
+.shot-list li {
+  margin-bottom: 4px;
+}
+
+.story-list button,
+.episode-list button,
+.scene-list > li > button,
+.shot-list button {
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.story-list button:hover,
+.episode-list button:hover,
+.scene-list > li > button:hover,
+.shot-list button:hover {
+  background: var(--accent-bg);
+}
+
+.story-list button.selected,
+.episode-list button.selected,
+.scene-list > li > button.selected,
+.shot-list button.selected {
+  border-color: var(--accent);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.shot-list {
+  padding-left: 12px;
+  margin-top: 4px;
+}
+
+.episode-list-section {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
+.meta {
+  color: var(--text);
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.source-section,
+.spec-section {
+  margin-top: 24px;
+}
+
+.source-content,
+.json {
+  background: var(--code-bg);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 15px;
+  line-height: 140%;
+}
+
+.shot-fields {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.shot-fields dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.shot-fields dd {
+  margin: 0;
+}
+
+.empty {
+  color: var(--text);
+  font-style: italic;
+}
+
+@media (max-width: 1024px) {
+  .story-workspace {
+    grid-template-columns: 1fr;
+  }
+}

@@ -223,12 +223,87 @@ The pre-commit hooks will:
 
 ### Environment Configuration
 
-1. Copy the example environment file:
+1. Copy the example environment file and fill in values for your local environment:
    ```bash
    cp .env.example .env
    ```
 
-2. Fill in the required values in `.env` (most are not needed for initial development)
+2. Never commit `.env` or any local environment file that contains secrets. `.env` is ignored by Git; `.env.example` is tracked and contains placeholders only.
+
+3. CI receives secrets through repository secrets and environment variables configured in GitHub Actions, never by committing them to the repository.
+
+4. Do not place secrets in frontend code. Frontend builds are public and must never contain API keys or credentials.
+
+5. Secrets must never appear in logs, URLs, error messages, or API responses. The backend configuration masks secret values in representations and avoids dumping them.
+
+### Transferring the Project
+
+The project can be packaged for transfer to another machine using the included utility:
+
+```bash
+./scripts/package_project.sh
+```
+
+Options:
+
+- `./scripts/package_project.sh --dry-run` — preview what would be included/excluded without creating the archive.
+- `./scripts/package_project.sh /path/to/output` — write the archive to a custom directory or `.zip` path.
+- `./scripts/package_project.sh --validate path/to/archive.zip` — verify an existing archive.
+
+What is intentionally excluded:
+
+- Installed dependencies (`node_modules`, Python `.venv`, egg-info).
+- Build artifacts (`frontend/dist`, `.vite`, compiled Python files).
+- Caches (`.pytest_cache`, `.ruff_cache`, `__pycache__`).
+- Local databases and runtime storage (`*.db`, `storage/`).
+- Secrets (`.env`, `.env.local`, `.env.*.local`, keys, credentials).
+- Git history and machine-specific files.
+
+`.env.example` is preserved and must be copied to `.env` on the destination laptop and filled with real values. Dependencies must be reinstalled there (`pip install -e ".[dev]"` in `backend`, `npm install` in `frontend`). The generated archive is validated automatically to ensure it does not contain forbidden artifacts.
+
+### Storage
+
+The backend uses a provider-neutral storage abstraction. Choose a backend with `STORAGE_BACKEND`:
+
+- **filesystem** (default for local development):
+  ```bash
+  STORAGE_BACKEND=filesystem
+  STORAGE_LOCAL_ROOT=storage
+  ```
+  Objects are stored under the configured local root using logical object keys. Path traversal is rejected.
+
+- **s3** (for MinIO, AWS S3, or other S3-compatible services):
+  ```bash
+  STORAGE_BACKEND=s3
+  STORAGE_BUCKET=ai-video-studio
+  STORAGE_ENDPOINT=http://localhost:9000
+  STORAGE_REGION=us-east-1
+  STORAGE_ACCESS_KEY=your_access_key
+  STORAGE_SECRET_KEY=your_secret_key
+  ```
+  The `boto3` and `botocore` packages are required at runtime for S3 storage. The backend does not currently depend on a running MinIO/S3 server for the default test suite.
+
+Keys are logical, such as `series/{series_id}/characters/{character_id}/references/{filename}`. The storage backend receives the key and never allows the caller to escape the configured root or bucket.
+
+### Universe Engine
+
+A `Series` is the root boundary of a persistent story universe. The universe engine aggregates canonical context consumed by later pipeline stages:
+
+- **Series** — root ownership boundary
+- **World** — persistent setting, era, geography, technology, rules, culture, and timeline context
+- **Visual Bible** — one-per-series canonical visual language (art style, color palette, lighting, camera, etc.)
+- **Audio Bible** — one-per-series canonical audio language (voice, narration, music, sound effects, etc.)
+- **Characters** — persistent identities with versioned states
+- **Locations** — persistent places with versioned states
+- **Story Objects** — persistent important props/artifacts
+
+Retrieve the aggregated read model via:
+
+```bash
+GET /api/v1/series/{series_id}/universe
+```
+
+The response is a read-only snapshot. Updates to individual entities continue to use their existing CRUD endpoints. Context never leaks across series boundaries.
 
 ### Verification
 
@@ -302,6 +377,43 @@ Use the appropriate issue template:
 - For questions about product requirements, reference `PRODUCT.md`
 - For questions about task priorities, reference `ROADMAP.yaml`
 - For implementation guidance, reference existing code patterns
+
+## Story Intelligence
+
+The `app.story_intelligence` package defines the boundary between story intake and future AI-driven generation.
+
+- `Story` captures the raw user-supplied source; `StoryVersion` preserves immutable source versions.
+- `StoryAnalysisResult` is the provider-neutral structured representation consumed by the next pipeline stage.
+- `StoryAnalyzer` is a replaceable contract. `DeterministicStoryAnalyzer` works locally without any network; `AIStoryAnalyzer` delegates to an `LLMProvider`.
+- `LLMProvider` is a provider-neutral adapter contract. `FakeLLMProvider` runs offline for tests. OpenAI, Anthropic, Gemini, and local-model adapters can be added later without changing the story domain.
+- `StoryEntityResolver` maps story entities to canonical universe entities without mutation or AI. Canonical IDs are never invented by the LLM.
+- Future `ScreenplayGenerator` implementations will consume `StoryAnalysisResult` and remain provider-agnostic.
+
+Select the analyzer through `?mode=deterministic` (default) or `?mode=ai`. Set `LLM_PROVIDER=fake` in the environment to run the AI path offline with the fake provider.
+
+## Production Planning
+
+The production planning hierarchy is `Series → Episode → Scene → Shot → ShotSpecification → Asset`.
+
+- `EpisodeScenePlanner` / `EpisodePlanningService` break an Episode into ordered Scenes using a `ScenePlannerStrategy`.
+- `ShotPlanningService` breaks a Scene into ordered Shots using a `ShotPlannerStrategy`.
+- `DeterministicScenePlanner` and `DeterministicShotPlanner` are the default offline strategies; they derive scenes/shots from existing source text.
+- Future AI-assisted planners can implement the same strategy contracts without changing the production domain.
+- `EpisodePlanningService.plan_and_create` and `ShotPlanningService.plan_and_create` reject overwriting existing records unless `replace=True` is explicitly passed.
+- Ordering is explicit via `sequence_order` and `scene_number`/`shot_number`.
+- Records are owned by their parent (`Scene` by `Episode`, `Shot` by `Scene`) and cannot cross series boundaries.
+- `ShotSpecification` is a provider-neutral production contract describing intent and constraints (aspect ratio, duration, canonical refs, output constraints). Generation providers are future adapters and are not part of the planning domain.
+- `Asset` is a provider-neutral domain for production artifacts (image, video, audio, storyboard, keyframe, thumbnail, reference). Assets are owned by a `Series` and reference canonical `Character`/`Location`/`StoryObject` entities by application-owned UUIDs. Assets store provider-neutral storage keys for future generation adapters.
+- `ImageGenerationProvider` is a provider-neutral boundary for image generation. The application builds `ImageGenerationRequest` objects from `ShotSpecification`/Asset data and receives `ImageGenerationResult` objects. Adapters for real providers live behind this interface; only `FakeImageGenerationProvider` is implemented for tests.
+- `VideoGenerationProvider` is the provider-neutral boundary for video generation. The application builds `VideoGenerationRequest` objects (supporting prompt, keyframes, reference assets, duration, aspect ratio, and motion guidance) and receives `VideoGenerationResult` objects containing `VideoReference` artifacts. Only `FakeVideoGenerationProvider` is implemented for offline tests; future adapters (Runway, Kling, Luma, Sora, Veo, local) are hidden behind this interface.
+- `ImageToVideoService` converts an approved storyboard/keyframe `Asset` into a `VideoGenerationRequest`. It validates series/shot ownership and asset approval, preserves canonical references through `ReferenceAssetResolver`, maps `ShotSpecification` duration/aspect ratio/motion into provider-neutral fields, and dispatches through `VideoGenerationService`.
+- `VideoGenerationJobService` provides a persistent provider-neutral video generation job lifecycle (`QUEUED` → `RUNNING` → `SUCCEEDED`/`FAILED`/`CANCELLED`) with bounded retry semantics and deterministic state transitions. It wraps `ImageToVideoService` for execution while remaining compatible with future asynchronous worker integration.
+- `VideoClipValidator` validates generated `VideoReference` metadata against `VideoGenerationRequest`/ `ShotSpecification` constraints (content type, dimensions, aspect ratio, duration within tolerance). `VideoClipStorageService` stores valid clips through the existing `StorageBackend` and persists them as `Asset` records of type `VIDEO`, preserving series ownership, source asset, and job traceability in `asset_metadata`. Failed validation does not create a video asset.
+- `Voice` is a provider-neutral series-owned voice identity for narration and dialogue. It may be associated with a canonical `Character` but does not rely on a vendor-specific voice ID as canonical identity. `Narration` is a provider-neutral dialogue/narration item tied to `Episode`/`Scene`/`Shot` (when applicable), `Voice`, `Character`, and an optional generated `Asset` of type `AUDIO`. `VoiceService` and `NarrationService` enforce series ownership and canonical-reference validation; future P7-T02 TTS adapters consume this domain.
+- `StoryboardService` builds a provider-neutral `ImageGenerationRequest` from a `ShotSpecification`, dispatches it through `ImageGenerationService`, and stores the result as a storyboard `Asset`.
+- `ReferenceAssetResolver` maps canonical `Character`/`Location`/`StoryObject` references to eligible visual reference `Asset`s in the same series. The resolved Asset IDs are passed through the existing provider-neutral `ImageGenerationRequest.reference_asset_ids` field.
+- `ImageGenerationJob` models a persistent provider-neutral job lifecycle (`QUEUED` → `RUNNING` → `SUCCEEDED`/`FAILED`/`CANCELLED`) with retry/attempt tracking. Execution state is separate from `ApprovalStatus` (`PENDING`/`APPROVED`/`REJECTED`). `ImageGenerationJobService` wraps synchronous execution today while remaining compatible with future async workers. `StoryboardService` is reused to build the provider-neutral request and persist generated storyboard `Asset`s.
+- Canonical entity references in scene, shot, and asset plans are resolved through `StoryEntityResolver` and are never invented by generated output.
 
 ## License
 

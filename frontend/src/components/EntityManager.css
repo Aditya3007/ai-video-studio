@@ -1,0 +1,69 @@
+.entity-manager {
+  margin-bottom: 32px;
+}
+
+.entity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.entity-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.entity-name {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.entity-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.entity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.entity-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  font-size: 15px;
+}
+
+.entity-form input,
+.entity-form textarea {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.entity-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.entity-form button {
+  align-self: flex-start;
+  padding: 8px 16px;
+}
+
+.empty {
+  color: var(--text);
+  font-style: italic;
+}

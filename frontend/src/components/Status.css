@@ -1,0 +1,19 @@
+.status {
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.status.loading {
+  color: var(--text-h);
+}
+
+.status.error {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.status.empty {
+  color: var(--text);
+  font-style: italic;
+}

@@ -1,0 +1,78 @@
+.studio {
+  display: flex;
+  min-height: 100svh;
+  text-align: left;
+}
+
+.studio-workspace {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.series-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.series-header h1 {
+  font-size: 32px;
+  margin: 0 0 4px;
+}
+
+.series-meta {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.tabs button {
+  padding: 8px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.tabs button.active,
+.tabs button:hover {
+  color: var(--text-h);
+  border-bottom-color: var(--accent);
+}
+
+.empty-workspace {
+  color: var(--text);
+  font-style: italic;
+  text-align: center;
+  padding: 48px;
+}
+
+.overview {
+  display: grid;
+  gap: 24px;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.timeline dt {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.timeline dd {
+  margin: 0;
+}
