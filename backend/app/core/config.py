@@ -49,7 +49,7 @@ class Settings(BaseModel):
 
     # LLM provider selection (optional until P3-T03)
     llm_provider: Literal[
-        "deterministic", "fake", "openai", "anthropic", "gemini", "local"
+        "deterministic", "fake", "openai", "anthropic", "gemini", "groq", "local"
     ] = "deterministic"
     llm_model: str | None = None
 
@@ -59,12 +59,14 @@ class Settings(BaseModel):
 
     # Video generation provider selection (optional until P6-T01)
     video_generation_provider: Literal[
-        "fake", "runway", "kling", "luma", "sora", "veo", "local"
+        "fake", "runway", "kling", "luma", "sora", "veo", "local", "json2video"
     ] = "fake"
     video_generation_model: str | None = None
 
     # TTS provider selection (optional until P7-T02)
-    tts_provider: Literal["fake", "openai", "elevenlabs", "google", "azure", "amazon"] = "fake"
+    tts_provider: Literal[
+        "fake", "openai", "elevenlabs", "google", "azure", "amazon", "sarvam"
+    ] = "fake"
     tts_model: str | None = None
 
     # Provider/model selection policy (P14-T04)

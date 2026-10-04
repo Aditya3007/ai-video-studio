@@ -1,6 +1,9 @@
 """Factory for selecting the configured image generation provider."""
 
+import os
+
 from app.core.config import Settings, get_settings
+from app.media_generation.image.gemini import GeminiImageProvider
 from app.media_generation.image.provider import ImageGenerationProvider
 from app.model_registry import ModelCapabilityType
 from app.provider_registry import ProviderType, get_default_registry
@@ -39,12 +42,15 @@ class ImageGenerationProviderFactory:
         provider = getattr(settings, "image_generation_provider", "fake")
         if provider == "fake":
             return get_default_registry().resolve(ProviderType.IMAGE_GENERATION, "fake")
+        if provider == "google":
+            return GeminiImageProvider(
+                model=settings.image_generation_model or "gemini-3.1-flash-image",
+                api_key=os.getenv("GEMINI_API_KEY"),
+            )
         if provider == "openai":
             raise NotImplementedError("OpenAI image provider is not yet implemented.")
         if provider == "stability":
             raise NotImplementedError("Stability provider is not yet implemented.")
-        if provider == "google":
-            raise NotImplementedError("Google image provider is not yet implemented.")
         if provider == "local":
             raise NotImplementedError("Local image provider is not yet implemented.")
 

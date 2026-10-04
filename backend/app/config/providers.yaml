@@ -1,0 +1,28 @@
+# AI Video Studio Provider Configuration
+# This file controls provider selection and non-secret settings.
+# Secrets (API keys) must be supplied via environment variables.
+
+llm:
+  provider: fake
+  model: llama-3.3-70b-versatile
+  temperature: 0.7
+  max_tokens: 4096
+
+image:
+  provider: fake
+  model: gemini-3.1-flash-image
+  aspect_ratio: "9:16"
+
+tts:
+  provider: fake
+  model: bulbul:v3
+  language: "hi-IN"
+  voice: shubh
+
+video:
+  provider: fake
+  mode: composition
+
+pipeline:
+  aspect_ratio: "9:16"
+  target_duration_seconds: 30

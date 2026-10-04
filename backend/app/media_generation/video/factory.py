@@ -1,6 +1,9 @@
 """Factory for selecting the configured video generation provider."""
 
+import os
+
 from app.core.config import Settings, get_settings
+from app.media_generation.video.json2video import JSON2VideoProvider
 from app.media_generation.video.provider import VideoGenerationProvider
 from app.model_registry import ModelCapabilityType
 from app.provider_registry import ProviderType, get_default_registry
@@ -37,10 +40,14 @@ class VideoGenerationProviderFactory:
         provider = getattr(settings, "video_generation_provider", "fake")
         if provider == "fake":
             return get_default_registry().resolve(ProviderType.VIDEO_GENERATION, "fake")
-        if provider == "runway":
-            raise NotImplementedError("Runway video provider is not yet implemented.")
+        if provider == "json2video":
+            return JSON2VideoProvider(
+                api_key=os.getenv("JSON2VIDEO_API_KEY"),
+            )
         if provider == "kling":
             raise NotImplementedError("Kling video provider is not yet implemented.")
+        if provider == "runway":
+            raise NotImplementedError("Runway video provider is not yet implemented.")
         if provider == "luma":
             raise NotImplementedError("Luma video provider is not yet implemented.")
         if provider == "sora":

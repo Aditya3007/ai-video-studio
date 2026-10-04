@@ -1,5 +1,9 @@
 """Shared test fixtures."""
 
+import socket
+from collections.abc import Iterator
+from typing import Any
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
@@ -44,3 +48,26 @@ def client():
     app.dependency_overrides.clear()
     Base.metadata.drop_all(engine)
     engine.dispose()
+
+
+@pytest.fixture
+def block_network(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Fail fast if a test attempts a real outbound network connection.
+
+    Provider adapter tests must stay fully offline and must never spend real
+    money on paid APIs (Gemini, Sarvam, Groq, ...). Opt in per module with
+    ``@pytest.mark.usefixtures("block_network")`` so that any provider code
+    which escapes its SDK/HTTP mock fails loudly instead of silently issuing a
+    real request.
+    """
+
+    def _deny(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError(
+            "Real network access attempted during tests. "
+            "Mock the provider SDK/HTTP boundary instead."
+        )
+
+    monkeypatch.setattr(socket.socket, "connect", _deny)
+    monkeypatch.setattr(socket.socket, "connect_ex", _deny)
+    monkeypatch.setattr(socket, "create_connection", _deny)
+    yield

@@ -1,7 +1,10 @@
 """Factory for selecting the configured TTS provider."""
 
+import os
+
 from app.core.config import Settings, get_settings
 from app.media_generation.tts.provider import TTSProvider
+from app.media_generation.tts.sarvam import SarvamTTSProvider
 from app.model_registry import ModelCapabilityType
 from app.provider_registry import ProviderType, get_default_registry
 from app.services.cost_aware_selector import CostAwareSelector
@@ -37,6 +40,11 @@ class TTSProviderFactory:
         provider = getattr(settings, "tts_provider", "fake")
         if provider == "fake":
             return get_default_registry().resolve(ProviderType.TTS, "fake")
+        if provider == "sarvam":
+            return SarvamTTSProvider(
+                model=settings.tts_model or "bulbul:v3",
+                api_key=os.getenv("SARVAM_API_KEY"),
+            )
         if provider == "openai":
             raise NotImplementedError("OpenAI TTS provider is not yet implemented.")
         if provider == "elevenlabs":
