@@ -35,7 +35,7 @@ def build_analysis_prompt(
         "language": story.language,
     }
 
-    user_prompt = f"""Analyze the following {story.source_type.lower().replace('_', ' ')} and produce a structured JSON story analysis.
+    user_prompt = f"""Analyze the following {story.source_type.lower().replace("_", " ")} and produce a structured JSON story analysis.
 
 Story:
 ```json
