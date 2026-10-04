@@ -87,3 +87,7 @@ temp/
 *.pem
 *.key
 secrets/
+
+# Storage
+storage/
+backend/storage/
